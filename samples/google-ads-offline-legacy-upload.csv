@@ -1,0 +1,3 @@
+Parameters:TimeZone=America/Los_Angeles
+Google Click ID,Conversion Name,Conversion Time,Conversion Value,Conversion Currency,Order ID,Event source
+REPLACE_WITH_REAL_GCLID,Appointment Completed (Primary),2026-09-15 10:30:00,1,USD,avia-demo-001,web
