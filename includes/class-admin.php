@@ -1345,7 +1345,18 @@ class Avia_Attribution_Admin {
 		<div class="avia-attribution-panel avia-conversions-panel">
 			<div class="avia-panel-heading-row">
 				<div>
-					<h2>Attributed conversions</h2>
+					<h2 class="avia-conversions-heading">
+						<span>Attributed conversions</span>
+						<button
+							type="button"
+							class="avia-metrics-help-trigger"
+							id="avia-status-help-trigger"
+							aria-label="What do status labels mean?"
+							title="What do status labels mean?"
+						>
+							<span class="dashicons dashicons-info-outline" aria-hidden="true"></span>
+						</button>
+					</h2>
 					<p class="description avia-conversions-data-note"><b style="background: #e2e7eb;padding: 2px;">Real ads conversions tracking started on OCT 26, 2026</b>. Earlier records may not match Google ADS/Boulevard reports exactly.</p>
 					<p class="description">Showing data for <strong><?php echo esc_html( $range_ctx['label'] ); ?></strong>.</p>
 				</div>
@@ -1356,7 +1367,7 @@ class Avia_Attribution_Admin {
 					<span>Status</span>
 					<select id="avia-conversions-status-filter">
 						<option value="">All</option>
-						<option value="uploaded">uploaded</option>
+						<option value="uploaded">submission</option>
 						<option value="merged">merged</option>
 						<option value="skipped">skipped</option>
 						<option value="pending">pending</option>
@@ -1368,6 +1379,43 @@ class Avia_Attribution_Admin {
 				<thead><tr><th>Client</th><th>Click ID</th><th>Campaign</th><th>Value</th><th>Status</th><th>Lead date</th><th>Completed</th><th>Details</th></tr></thead>
 				<tbody></tbody>
 			</table>
+		</div>
+
+		<div id="avia-status-help-modal" class="avia-modal" hidden aria-hidden="true">
+			<div class="avia-modal-backdrop" data-close-status-help="1"></div>
+			<div class="avia-modal-dialog avia-metrics-help-dialog" role="dialog" aria-modal="true" aria-labelledby="avia-status-help-modal-title">
+				<div class="avia-modal-header">
+					<h2 id="avia-status-help-modal-title">Conversion status guide</h2>
+					<button type="button" class="avia-modal-close" data-close-status-help="1" aria-label="Close">&times;</button>
+				</div>
+				<div class="avia-modal-body avia-metrics-help-body">
+					<p class="description avia-metrics-help-intro">
+						Each row is one booking the plugin tried to attribute. Status tells you what happened with Google Ads.
+					</p>
+					<dl class="avia-metrics-help-list">
+						<div class="avia-metrics-help-item">
+							<dt>submission</dt>
+							<dd>Sent to Google Ads successfully. Google accepted the conversion (it can still take hours to show in Ads reports).</dd>
+						</div>
+						<div class="avia-metrics-help-item">
+							<dt>merged</dt>
+							<dd>Same Google click already had a conversion, so this booking’s value was folded into that one row (one click = one conversion, summed value).</dd>
+						</div>
+						<div class="avia-metrics-help-item">
+							<dt>skipped</dt>
+							<dd>Not sent to Google. Usually no valid ads click ID, failed ads checks, or intentionally excluded.</dd>
+						</div>
+						<div class="avia-metrics-help-item">
+							<dt>pending</dt>
+							<dd>Queued and waiting to send to Google Ads (or waiting for the next upload run).</dd>
+						</div>
+						<div class="avia-metrics-help-item">
+							<dt>failed</dt>
+							<dd>Send to Google failed. Check the row’s error message, then retry with Upload pending.</dd>
+						</div>
+					</dl>
+				</div>
+			</div>
 		</div>
 
 		<div id="avia-conversion-modal" class="avia-modal" hidden aria-hidden="true">
@@ -2101,10 +2149,11 @@ class Avia_Attribution_Admin {
 	private static function render_upload_status_badge( $status ) {
 		$status = sanitize_key( (string) $status );
 		$labels = array(
-			'uploaded' => 'Uploaded',
-			'pending'  => 'Pending',
-			'failed'   => 'Failed',
-			'skipped'  => 'Skipped',
+			'uploaded' => 'submission',
+			'pending'  => 'pending',
+			'failed'   => 'failed',
+			'skipped'  => 'skipped',
+			'merged'   => 'merged',
 		);
 		$label  = $labels[ $status ] ?? ucfirst( $status );
 

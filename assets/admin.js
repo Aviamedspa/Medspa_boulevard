@@ -658,7 +658,16 @@
   }
 
   function renderLocalServicesValueInfo() {
-    return '<button type="button" class="avia-lsa-value-info" data-open-lsa-value="1" title="Why Local Services has no conversion value" aria-label="Why Local Services has no conversion value"><span class="avia-lsa-value-info-icon" aria-hidden="true">i</span></button>';
+    return '<span class="avia-lsa-value-offline" title="Local Services value is offline — not booking revenue">offline</span>' +
+      '<button type="button" class="avia-lsa-value-info" data-open-lsa-value="1" title="Why Local Services has no conversion value" aria-label="Why Local Services has no conversion value" tabindex="-1"><span class="avia-lsa-value-info-icon" aria-hidden="true">i</span></button>';
+  }
+
+  function formatConversionStatusLabel(status) {
+    var key = String(status || '').toLowerCase();
+    if (key === 'uploaded') {
+      return 'submission';
+    }
+    return key;
   }
 
   function openLsaValueModal() {
@@ -1393,7 +1402,7 @@
   function closeConversionModal() {
     var $modal = $('#avia-conversion-modal');
     $modal.attr('hidden', 'hidden').attr('aria-hidden', 'true').removeClass('is-open');
-    if (!$('#avia-metrics-help-modal.is-open').length) {
+    if (!$('.avia-modal.is-open').length) {
       $('body').removeClass('avia-modal-open');
     }
   }
@@ -1407,7 +1416,27 @@
   function closeMetricsHelpModal() {
     var $modal = $('#avia-metrics-help-modal');
     $modal.attr('hidden', 'hidden').attr('aria-hidden', 'true').removeClass('is-open');
-    if (!$('#avia-conversion-modal.is-open').length) {
+    if (!$('.avia-modal.is-open').length) {
+      $('body').removeClass('avia-modal-open');
+    }
+  }
+
+  function openStatusHelpModal() {
+    var $modal = $('#avia-status-help-modal');
+    if (!$modal.length) {
+      return;
+    }
+    $modal.removeAttr('hidden').attr('aria-hidden', 'false').addClass('is-open');
+    $('body').addClass('avia-modal-open');
+  }
+
+  function closeStatusHelpModal() {
+    var $modal = $('#avia-status-help-modal');
+    if (!$modal.length) {
+      return;
+    }
+    $modal.attr('hidden', 'hidden').attr('aria-hidden', 'true').removeClass('is-open');
+    if (!$('.avia-modal.is-open').length) {
       $('body').removeClass('avia-modal-open');
     }
   }
@@ -1441,6 +1470,20 @@
 
   $(document).on('click', '[data-close-metrics-help="1"]', function () {
     closeMetricsHelpModal();
+  });
+
+  $(document).on('click', '#avia-status-help-trigger', function () {
+    openStatusHelpModal();
+  });
+
+  $(document).on('click', '[data-close-status-help="1"]', function () {
+    closeStatusHelpModal();
+  });
+
+  $(document).on('keydown', function (event) {
+    if (event.key === 'Escape' && $('#avia-status-help-modal.is-open').length) {
+      closeStatusHelpModal();
+    }
   });
 
   $(document).on('keydown', function (event) {
@@ -1522,9 +1565,10 @@
           if (type !== 'display') return value || '';
           var msg = String((row && row.error_message) || '');
           var isMerged = /merged into upload #\d+/i.test(msg);
-          var label = isMerged ? 'merged' : (value || '');
-          if (!label) return '';
+          var raw = isMerged ? 'merged' : (value || '');
+          if (!raw) return '';
           var cls = isMerged ? 'merged' : (value || '');
+          var label = formatConversionStatusLabel(raw);
           return '<span class="avia-status-badge avia-status-' + escapeHtml(cls) + '" title="' + escapeHtml(msg) + '">' + escapeHtml(label) + '</span>';
         } },
         { data: 'click_at', render: conversionText },

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: AVIA Attribution
  * Description: First-party Google Ads attribution capture and Boulevard webhook ledger for AVIA Medical Spa. Support - freelancerjd55@gmail.com
- * Version: 1.10.96
+ * Version: 1.10.97
  * Author: PROS Global Inc × Drunall.com
  * License: GPL-2.0-or-later
  * Text Domain: avia-attribution
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'AVIA_ATTRIBUTION_VERSION', '1.10.96' );
+define( 'AVIA_ATTRIBUTION_VERSION', '1.10.97' );
 define( 'AVIA_ATTRIBUTION_FILE', __FILE__ );
 define( 'AVIA_ATTRIBUTION_PATH', plugin_dir_path( __FILE__ ) );
 define( 'AVIA_ATTRIBUTION_URL', plugin_dir_url( __FILE__ ) );

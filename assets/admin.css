@@ -1005,8 +1005,17 @@ margin: 0 0 14px !important;
 .avia-campaign-lsa-value {
   text-align: left;
 }
+.avia-lsa-value-offline {
+  display: inline-block;
+  color: #646970;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
+  text-transform: lowercase;
+}
 .avia-lsa-value-info {
-  display: inline-flex;
+  display: none !important;
   align-items: center;
   justify-content: center;
   width: 20px;
@@ -1032,6 +1041,21 @@ margin: 0 0 14px !important;
   font-style: italic;
   font-weight: 700;
   line-height: 1;
+}
+.avia-conversions-heading {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.avia-conversions-heading .avia-metrics-help-trigger {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+.avia-conversions-heading .avia-metrics-help-trigger .dashicons {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
 }
 .avia-lsa-value-dialog {
   max-width: 420px;
