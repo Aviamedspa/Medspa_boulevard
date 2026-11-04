@@ -1229,14 +1229,18 @@ class Avia_Attribution_Admin {
 			'custom'       => 'Custom range',
 		);
 		$is_custom_range = 'custom' === $range_key;
+		$range_dates     = $start_date . ' to ' . $end_date;
+		$range_label_html = esc_html( $range_ctx['label'] );
+		if ( $range_ctx['label'] !== $range_dates ) {
+			$range_label_html .= ' <span class="avia-range-dates">(' . esc_html( $range_dates ) . ')</span>';
+		}
 		?>
 		<div class="avia-attribution-panel avia-dashboard-toolbar">
 			<div class="avia-panel-heading-row">
 				<div>
 					<h2>Performance overview</h2>
 					<p class="description">
-						Showing data for <strong><?php echo esc_html( $range_ctx['label'] ); ?></strong>.
-						Paid ads metrics from Google Ads API and attributed conversions tracked by this plugin.
+						Showing data for <strong><?php echo $range_label_html; ?></strong>.
 					</p>
 				</div>
 				<form method="get" action="<?php echo esc_url( admin_url( 'admin.php' ) ); ?>" class="avia-dashboard-range-form" id="avia-dashboard-range-form">
@@ -1278,7 +1282,7 @@ class Avia_Attribution_Admin {
 							id="avia-dashboard-end-date"
 							name="end_date"
 							value="<?php echo esc_attr( $is_custom_range ? $end_date : $default_custom['end_date'] ); ?>"
-							max="<?php echo esc_attr( current_time( 'Y-m-d' ) ); ?>"
+							data-max="<?php echo esc_attr( current_time( 'Y-m-d' ) ); ?>"
 						/>
 						<button type="submit" class="button button-secondary">Apply</button>
 					</span>
@@ -1358,7 +1362,7 @@ class Avia_Attribution_Admin {
 						</button>
 					</h2>
 					<p class="description avia-conversions-data-note"><b style="background: #e2e7eb;padding: 2px;">Real ads conversions tracking started on OCT 26, 2026</b>. Earlier records may not match Google ADS/Boulevard reports exactly.</p>
-					<p class="description">Showing data for <strong><?php echo esc_html( $range_ctx['label'] ); ?></strong>.</p>
+					<p class="description">Showing data for <strong><?php echo $range_label_html; ?></strong>.</p>
 				</div>
 			</div>
 			<p id="avia-conversions-error" class="avia-fail" role="alert" hidden></p>

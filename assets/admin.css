@@ -376,6 +376,7 @@
 	font-size: 12px;
 	font-weight: 600;
 	line-height: 1.6;
+	text-transform: capitalize;
 }
 
 .avia-status-uploaded {
@@ -1012,7 +1013,7 @@ margin: 0 0 14px !important;
   font-weight: 500;
   letter-spacing: 0.02em;
   line-height: 1.4;
-  text-transform: lowercase;
+  text-transform: capitalize;
 }
 .avia-lsa-value-info {
   display: none !important;
@@ -1343,6 +1344,7 @@ body.avia-modal-open {
 .avia-conversions-status-filter select {
   min-width: 120px;
   min-height: 34px;
+  text-transform: capitalize;
 }
 
 .avia-view-campaign-conversions { text-align: left; font-weight: 600; }
