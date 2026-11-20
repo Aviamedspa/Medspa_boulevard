@@ -971,54 +971,80 @@ class Avia_Attribution_Google_Ads_Api {
 	public static function get_campaign_performance( $range_key = 'last_30_days', $start_date = '', $end_date = '', $campaign_ids = array() ) {
 		$campaign_ids = self::sanitize_campaign_ids( $campaign_ids );
 		$range     = Avia_Attribution_Dashboard::resolve_range( $range_key, $start_date, $end_date );
-		$cache_key = 'avia_gads_camps_v26_' . md5( $range['start_date'] . $range['end_date'] . implode( ',', $campaign_ids ) );
+		$cache_key = 'avia_gads_camps_v27_' . md5( $range['start_date'] . $range['end_date'] . implode( ',', $campaign_ids ) );
 		$cached    = get_transient( $cache_key );
 		if ( is_array( $cached ) ) {
 			return $cached;
 		}
 
+		if ( empty( $campaign_ids ) ) {
+			$list_query = "SELECT campaign.id, campaign.name, campaign.status
+				FROM campaign
+				WHERE campaign.status = 'ENABLED'
+				ORDER BY campaign.name";
+		} else {
+			$list_query = "SELECT campaign.id, campaign.name, campaign.status
+				FROM campaign
+				WHERE campaign.id IN (" . implode( ',', $campaign_ids ) . ")
+					AND campaign.status != 'REMOVED'
+				ORDER BY campaign.name";
+		}
+
+		$list_data = self::search( $list_query );
+		if ( is_wp_error( $list_data ) ) {
+			return $list_data;
+		}
+
+		$aggregated = array();
+		foreach ( (array) ( $list_data['results'] ?? array() ) as $row ) {
+			$campaign = $row['campaign'] ?? array();
+			$id       = (string) ( $campaign['id'] ?? '' );
+			if ( '' === $id ) {
+				continue;
+			}
+
+			$aggregated[ $id ] = array(
+				'id'                => $id,
+				'name'              => (string) ( $campaign['name'] ?? '' ),
+				'status'            => (string) ( $campaign['status'] ?? '' ),
+				'clicks'            => 0,
+				'impressions'       => 0,
+				'cost_micros'       => 0,
+				'conversions'       => 0.0,
+				'conversions_value' => 0.0,
+			);
+		}
+
+		if ( empty( $aggregated ) ) {
+			set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
+			return array();
+		}
+
+		$visible_ids = array_keys( $aggregated );
 		$date_clause = self::build_segments_date_clause( $range['key'], $range['start_date'], $range['end_date'] );
-		$campaign_clause = empty( $campaign_ids ) ? '' : ' AND campaign.id IN (' . implode( ',', $campaign_ids ) . ')';
-		$query       = "SELECT
-			segments.date,
+		$metrics_query = "SELECT
 			campaign.id,
-			campaign.name,
-			campaign.status,
 			metrics.clicks,
 			metrics.impressions,
 			metrics.cost_micros,
 			metrics.conversions,
 			metrics.conversions_value
 		FROM campaign
-		WHERE {$date_clause}{$campaign_clause}
-			AND campaign.status != 'REMOVED'";
+		WHERE {$date_clause}
+			AND campaign.id IN (" . implode( ',', $visible_ids ) . ")";
 
-		$data = self::search( $query );
+		$data = self::search( $metrics_query );
 		if ( is_wp_error( $data ) ) {
 			return $data;
 		}
 
-		$aggregated = array();
 		foreach ( (array) ( $data['results'] ?? array() ) as $row ) {
 			$campaign = $row['campaign'] ?? array();
 			$metrics  = $row['metrics'] ?? array();
 			$id       = (string) ( $campaign['id'] ?? '' );
 
-			if ( '' === $id ) {
+			if ( '' === $id || ! isset( $aggregated[ $id ] ) ) {
 				continue;
-			}
-
-			if ( ! isset( $aggregated[ $id ] ) ) {
-				$aggregated[ $id ] = array(
-					'id'                => $id,
-					'name'              => (string) ( $campaign['name'] ?? '' ),
-					'status'            => (string) ( $campaign['status'] ?? '' ),
-					'clicks'            => 0,
-					'impressions'       => 0,
-					'cost_micros'       => 0,
-					'conversions'       => 0.0,
-					'conversions_value' => 0.0,
-				);
 			}
 
 			$aggregated[ $id ]['clicks']            += (int) ( $metrics['clicks'] ?? 0 );
