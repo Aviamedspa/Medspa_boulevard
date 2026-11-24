@@ -1226,6 +1226,12 @@ class Avia_Attribution_Dashboard {
 				'highlight' => false,
 				'help'      => 'Average cost per click in Google Ads for the selected range.',
 			),
+			'phone_calls'             => array(
+				'label'     => 'Phone calls',
+				'group'     => 'ads',
+				'highlight' => false,
+				'help'      => 'Phone calls from Google Ads for the selected range. Same number as the Phone calls column in Google Ads (calls from call assets and call ads).',
+			),
 			'uploaded'                => array(
 				'label'     => 'Uploaded to Google',
 				'group'     => 'local',
@@ -1264,7 +1270,7 @@ class Avia_Attribution_Dashboard {
 		foreach ( array_keys( self::get_metric_definitions() ) as $index => $metric_id ) {
 			$layout[] = array(
 				'id'      => $metric_id,
-				'visible' => true,
+				'visible' => 'phone_calls' !== $metric_id,
 				'order'   => $index,
 			);
 		}
@@ -1306,7 +1312,7 @@ class Avia_Attribution_Dashboard {
 
 			$sanitized[] = array(
 				'id'      => $metric_id,
-				'visible' => true,
+				'visible' => 'phone_calls' !== $metric_id,
 				'order'   => count( $sanitized ),
 			);
 		}

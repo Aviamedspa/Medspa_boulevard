@@ -847,7 +847,7 @@ class Avia_Attribution_Google_Ads_Api {
 		$campaign_ids = self::sanitize_campaign_ids( $campaign_ids );
 		$range     = Avia_Attribution_Dashboard::resolve_range( $range_key, $start_date, $end_date );
 		// v27: campaign-level rollup so Local Services placeholder conversion value can be excluded.
-		$cache_key = 'avia_gads_perf_v27_' . md5( $range['start_date'] . $range['end_date'] . implode( ',', $campaign_ids ) );
+		$cache_key = 'avia_gads_perf_v28_' . md5( $range['start_date'] . $range['end_date'] . implode( ',', $campaign_ids ) );
 		$cached    = get_transient( $cache_key );
 		if ( is_array( $cached ) ) {
 			return $cached;
@@ -864,7 +864,8 @@ class Avia_Attribution_Google_Ads_Api {
 			metrics.impressions,
 			metrics.cost_micros,
 			metrics.conversions,
-			metrics.conversions_value
+			metrics.conversions_value,
+			metrics.phone_calls
 		FROM campaign
 		WHERE {$date_clause}{$campaign_clause}
 			AND campaign.status != 'REMOVED'";
@@ -880,6 +881,7 @@ class Avia_Attribution_Google_Ads_Api {
 			'cost_micros'       => 0,
 			'conversions'       => 0.0,
 			'conversions_value' => 0.0,
+			'phone_calls'       => 0,
 		);
 
 		foreach ( (array) ( $data['results'] ?? array() ) as $row ) {
@@ -892,6 +894,7 @@ class Avia_Attribution_Google_Ads_Api {
 			if ( ! self::is_local_services_campaign_name( $name ) ) {
 				$totals['conversions_value'] += (float) ( $metrics['conversionsValue'] ?? 0 );
 			}
+			$totals['phone_calls'] += (int) ( $metrics['phoneCalls'] ?? 0 );
 		}
 
 		$spend = round( $totals['cost_micros'] / 1000000, 2 );
@@ -909,6 +912,7 @@ class Avia_Attribution_Google_Ads_Api {
 			'conversions'       => round( $totals['conversions'], 2 ),
 			'conversions_value' => round( $totals['conversions_value'], 2 ),
 			'cpc'               => $cpc,
+			'phone_calls'       => (int) $totals['phone_calls'],
 			'roas'              => $roas,
 			'fetched_at'        => current_time( 'mysql' ),
 		);
@@ -971,7 +975,7 @@ class Avia_Attribution_Google_Ads_Api {
 	public static function get_campaign_performance( $range_key = 'last_30_days', $start_date = '', $end_date = '', $campaign_ids = array() ) {
 		$campaign_ids = self::sanitize_campaign_ids( $campaign_ids );
 		$range     = Avia_Attribution_Dashboard::resolve_range( $range_key, $start_date, $end_date );
-		$cache_key = 'avia_gads_camps_v27_' . md5( $range['start_date'] . $range['end_date'] . implode( ',', $campaign_ids ) );
+		$cache_key = 'avia_gads_camps_v28_' . md5( $range['start_date'] . $range['end_date'] . implode( ',', $campaign_ids ) );
 		$cached    = get_transient( $cache_key );
 		if ( is_array( $cached ) ) {
 			return $cached;
@@ -1012,6 +1016,7 @@ class Avia_Attribution_Google_Ads_Api {
 				'cost_micros'       => 0,
 				'conversions'       => 0.0,
 				'conversions_value' => 0.0,
+				'phone_calls'       => 0,
 			);
 		}
 
@@ -1028,7 +1033,8 @@ class Avia_Attribution_Google_Ads_Api {
 			metrics.impressions,
 			metrics.cost_micros,
 			metrics.conversions,
-			metrics.conversions_value
+			metrics.conversions_value,
+			metrics.phone_calls
 		FROM campaign
 		WHERE {$date_clause}
 			AND campaign.id IN (" . implode( ',', $visible_ids ) . ")";
@@ -1052,6 +1058,7 @@ class Avia_Attribution_Google_Ads_Api {
 			$aggregated[ $id ]['cost_micros']       += (int) ( $metrics['costMicros'] ?? 0 );
 			$aggregated[ $id ]['conversions']       += (float) ( $metrics['conversions'] ?? 0 );
 			$aggregated[ $id ]['conversions_value'] += (float) ( $metrics['conversionsValue'] ?? 0 );
+			$aggregated[ $id ]['phone_calls']       += (int) ( $metrics['phoneCalls'] ?? 0 );
 		}
 
 		$campaigns = array_values( $aggregated );
@@ -1076,6 +1083,7 @@ class Avia_Attribution_Google_Ads_Api {
 				'conversions'       => round( $campaign['conversions'], 2 ),
 				'conversions_value' => round( $campaign['conversions_value'], 2 ),
 				'cpc'               => $campaign['clicks'] > 0 ? round( $spend / $campaign['clicks'], 2 ) : 0.0,
+				'phone_calls'       => (int) $campaign['phone_calls'],
 				'roas'              => $spend > 0 ? round( $campaign['conversions_value'] / $spend, 2 ) : null,
 			);
 		}

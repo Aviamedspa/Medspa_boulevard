@@ -717,7 +717,8 @@
       clicks: 0,
       impressions: 0,
       conversions: 0,
-      conversions_value: 0
+      conversions_value: 0,
+      phone_calls: 0
     };
     (rows || []).forEach(function (row) {
       totals.spend += Number(row.spend || 0);
@@ -725,6 +726,7 @@
       totals.impressions += Number(row.impressions || 0);
       totals.conversions += Number(row.conversions || 0);
       totals.conversions_value += campaignValueForTotals(row);
+      totals.phone_calls += Number(row.phone_calls || 0);
     });
     totals.spend = Math.round(totals.spend * 100) / 100;
     totals.conversions = Math.round(totals.conversions * 100) / 100;
@@ -783,7 +785,7 @@
     }
 
     var html = '<table id="avia-campaign-performance-table" class="widefat striped avia-campaign-table"><thead><tr>';
-    html += '<th>Campaign</th><th>Ad spend</th><th>Clicks</th><th>Impressions</th><th>Conversions</th><th>Conv. value</th><th>ROAS</th><th>CPC</th>';
+    html += '<th>Campaign</th><th>Ad spend</th><th>Clicks</th><th>Impressions</th><th>Conversions</th><th>Conv. value</th><th>ROAS</th><th>Phone calls</th>';
     html += '</tr></thead><tbody>';
 
     filtered.forEach(function (row) {
@@ -807,11 +809,11 @@
       if (isLsa) {
         html += '<td class="avia-campaign-lsa-value" data-order="-1">' + renderLocalServicesValueInfo() + '</td>';
         html += '<td class="avia-muted" data-order="-1">\u2014</td>';
-        html += '<td class="avia-muted" data-order="-1">\u2014</td>';
+        html += '<td data-order="' + Number(row.phone_calls || 0) + '">' + escapeHtml(String(row.phone_calls || 0)) + '</td>';
       } else {
         html += '<td data-order="' + Number(row.conversions_value || 0) + '">' + formatMoney(row.conversions_value) + '</td>';
         html += '<td data-order="' + (row.roas == null || row.roas === '' ? -1 : Number(row.roas)) + '">' + formatRoas(row.roas) + '</td>';
-        html += '<td data-order="' + Number(row.cpc || 0) + '">' + formatMoney(row.cpc) + '</td>';
+        html += '<td data-order="' + Number(row.phone_calls || 0) + '">' + escapeHtml(String(row.phone_calls || 0)) + '</td>';
       }
       html += '</tr>';
     });
@@ -825,7 +827,7 @@
     html += '<td><strong>' + escapeHtml(String(totals.conversions)) + '</strong></td>';
     html += '<td><strong>' + formatMoney(totals.conversions_value) + '</strong></td>';
     html += '<td><strong>' + formatRoas(totals.roas) + '</strong></td>';
-    html += '<td><strong>' + formatMoney(totals.cpc) + '</strong></td>';
+    html += '<td><strong>' + escapeHtml(String(totals.phone_calls)) + '</strong></td>';
     html += '</tr></tfoot></table>';
     return html;
   }
@@ -953,6 +955,7 @@
     $('#avia-dashboard-metrics [data-metric="conv_value"]').text(formatMoney(totals.conversions_value));
     $('#avia-dashboard-metrics [data-metric="roas"]').text(formatRoas(totals.roas));
     $('#avia-dashboard-metrics [data-metric="cpc"]').text(formatMoney(totals.cpc));
+    $('#avia-dashboard-metrics [data-metric="phone_calls"]').text(totals.phone_calls);
   }
 
   function refreshCampaignTableView() {
@@ -996,7 +999,7 @@
       'Conversions',
       'Conv. value',
       'ROAS',
-      'Avg. CPC'
+      'Phone calls'
     ];
     var lines = [headers.map(csvEscape).join(',')];
 
@@ -1012,7 +1015,7 @@
           row.conversions != null ? row.conversions : 0,
           isLsa ? 'See Local Services reports (not booking revenue)' : (row.conversions_value != null ? Number(row.conversions_value).toFixed(2) : '0.00'),
           isLsa ? '' : (row.roas != null ? Number(row.roas).toFixed(2) : ''),
-          isLsa ? '' : (row.cpc != null ? Number(row.cpc).toFixed(2) : '0.00')
+          row.phone_calls != null ? row.phone_calls : 0
         ]
           .map(csvEscape)
           .join(',')
@@ -1030,7 +1033,7 @@
         totals.conversions,
         totals.conversions_value.toFixed(2),
         totals.roas != null ? totals.roas.toFixed(2) : '',
-        totals.cpc.toFixed(2)
+        totals.phone_calls
       ]
         .map(csvEscape)
         .join(',')
@@ -1143,6 +1146,7 @@
         $('#avia-dashboard-metrics [data-metric="conv_value"]').text(formatMoney(account.conversions_value));
         $('#avia-dashboard-metrics [data-metric="roas"]').text(formatRoas(account.roas));
         $('#avia-dashboard-metrics [data-metric="cpc"]').text(formatMoney(account.cpc));
+        $('#avia-dashboard-metrics [data-metric="phone_calls"]').text(account.phone_calls != null ? account.phone_calls : '—');
 
         var rangeLabel = account.range_label || aviaAttributionAdmin.dashboardRange || '';
         if (account.start_date && account.end_date) {
